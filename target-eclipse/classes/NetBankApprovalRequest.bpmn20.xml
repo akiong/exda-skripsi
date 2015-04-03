@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:activiti="http://activiti.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://www.activiti.org/test">
+    <process id="NetBankApprovalRequest" name="NetBankApprovalRequest">
+        <startEvent id="startevent1" name="Start"></startEvent>
+        <userTask id="maker" name="Initiate Transaction" activiti:assignee="${username}"></userTask>
+        <userTask id="approve" name="Handle Approve Request" activiti:candidateUsers="${userList}"
+                  activiti:dueDate="${dueDate}"></userTask>
+        <exclusiveGateway id="exclusivegateway1" name="Request Approved?"></exclusiveGateway>
+        <endEvent id="endevent1" name="End"></endEvent>
+        <userTask id="release" name="Handle Release Request" activiti:candidateUsers="${userList}"
+                  activiti:dueDate="${dueDate}"></userTask>
+        <endEvent id="endevent2" name="End"></endEvent>
+        <endEvent id="endevent4" name="End"></endEvent>
+        <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+        <sequenceFlow id="flow1" name="" sourceRef="startevent1" targetRef="maker"></sequenceFlow>
+        <sequenceFlow id="flow3" name="" sourceRef="approve" targetRef="exclusivegateway1"></sequenceFlow>
+        <sequenceFlow id="flow15" name="" sourceRef="maker" targetRef="exclusivegateway3"></sequenceFlow>
+        <sequenceFlow id="needApprover" name="" sourceRef="exclusivegateway3" targetRef="approve">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approver}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="needReleaser" name="" sourceRef="exclusivegateway3" targetRef="release">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approver && releaser}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="noApproverAndReleaser" name="" sourceRef="exclusivegateway3" targetRef="endevent4">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${!approver && !releaser}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="needMoreApprover" name="" sourceRef="exclusivegateway1" targetRef="approve">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${approved && !enoughApproval}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="rejectFlow" name="" sourceRef="exclusivegateway1" targetRef="endevent1">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approved}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow12" name="" sourceRef="exclusivegateway1" targetRef="release">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${approved && enoughApproval && releaser}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="noReleaser" name="" sourceRef="exclusivegateway1" targetRef="endevent1">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${approved && enoughApproval && !releaser}]]></conditionExpression>
+        </sequenceFlow>
+        <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+        <endEvent id="endevent3" name="End"></endEvent>
+        <sequenceFlow id="releaseFlow" name="" sourceRef="exclusivegateway2" targetRef="endevent3">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${released && enoughReleaser}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="rejectReleaseFlow" name="" sourceRef="exclusivegateway2" targetRef="endevent3">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!released}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow14" name="" sourceRef="release" targetRef="exclusivegateway2"></sequenceFlow>
+        <sequenceFlow id="needMoreReleaser" name="" sourceRef="exclusivegateway2" targetRef="release">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${released && !enoughReleaser}]]></conditionExpression>
+        </sequenceFlow>
+    </process>
+</definitions>
